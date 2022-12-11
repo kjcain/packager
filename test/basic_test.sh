@@ -2,7 +2,6 @@
 
 COLOR_CYAN='\033[0;36m'
 COLOR_GREEN='\033[0;32m'
-COLOR_YELLOW='\033[0;33m'
 COLOR_RED='\033[0;31m'
 COLOR_UNSET='\033[0m'
 
@@ -20,13 +19,13 @@ info()
 
 pass()
 {
-    COUNT_PASS=$(expr "$COUNT_PASS" + 1)
+    COUNT_PASS=$(( COUNT_PASS + 1 ))
     echo "$COLOR_GREEN" "$0 | [pass]" "$COLOR_UNSET\c" && "$@"
 }
 
 fail()
 {
-    COUNT_FAIL=$(expr "$COUNT_FAIL" + 1)
+    COUNT_FAIL=$(( COUNT_FAIL + 1 ))
     echo "$COLOR_RED" "$0 | [fail]" "$COLOR_UNSET\c" && "$@"
 }
 
@@ -39,7 +38,7 @@ runtime()
 
 results()
 {
-    COUNT_TOTAL=$(expr "$COUNT_PASS" + "$COUNT_FAIL")
+    COUNT_TOTAL=$(( COUNT_PASS + COUNT_FAIL ))
 
     if [ "$COUNT_TOTAL" -eq 0 ]  || [ "$COUNT_FAIL" -ne 0 ]
     then
