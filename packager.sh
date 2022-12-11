@@ -14,28 +14,29 @@ DEBUG_MODE=0
 OUTPUT=""
 PATTERN=""
 
+#todo: permit ../ parent directories
 FIND_OPTS="-type f ! -name '.*' ! -path '*/.*'"
 FIND_REGEX_OPT="-regex"
 PRUNE_WIDGET=""
 
 debug()
 {
-    [ "$DEBUG_MODE" -eq 1 ] && echo -n "$COLOR_CYAN[debug] $COLOR_UNSET" && "$@"
+    [ "$DEBUG_MODE" -ne 0 ] && echo -n "$COLOR_CYAN[debug] $COLOR_UNSET" && "$@"
 }
 
 info()
 {
-    echo -n "$COLOR_GREEN[ info] $COLOR_UNSET" && $@
+    echo -n "$COLOR_GREEN[ info] $COLOR_UNSET" && "$@"
 }
 
 warn()
 {
-    echo -n "$COLOR_YELLOW[ warn] $COLOR_UNSET" && $@
+    echo -n "$COLOR_YELLOW[ warn] $COLOR_UNSET" && "$@"
 }
 
 error()
 {
-    echo -n "$COLOR_RED[error] $COLOR_UNSET" && $@
+    echo -n "$COLOR_RED[error] $COLOR_UNSET" && "$@"
 }
 
 usage() 
@@ -64,7 +65,7 @@ check_settings()
     [ -z "$OUTPUT" ] && error echo "output_file is required" && FAIL=1;
     [ -z "$PATTERN" ] && error echo "pattern is required"&& FAIL=1;
 
-    [ "$FAIL" -eq 1 ] && error echo "invalid settings\n" && usage;
+    [ "$FAIL" -ne 0 ] && error echo "invalid settings\n" && usage;
 }
 
 show_settings()
@@ -77,6 +78,50 @@ show_settings()
     echo "DEBUG_MODE=$DEBUG_MODE"
     echo "OUTPUT=$OUTPUT"
     echo "PATTERN=$PATTERN"
+}
+
+locate_files()
+{
+    debug echo "locating files"
+
+    FIND_CMD="find $INCLUDE $FIND_OPTS $FIND_REGEX_OPT '$PATTERN' $PRUNE_WIDGET"
+
+    debug echo "find command\n$FIND_CMD"
+
+    FILES_RAW=$(eval "$FIND_CMD")
+    FILES=$(echo "$FILES_RAW" | xargs echo)
+    FILE_COUNT="$(echo "$FILES_RAW" | grep -v ^$ | wc -l)"
+
+    if [ "$FILE_COUNT" -gt 0 ]
+    then
+        debug echo "files\n$FILES_RAW"
+        info echo "found $FILE_COUNT files"
+    else
+        error echo "no files found"
+        exit 1
+    fi
+}
+
+pack_files()
+{
+    debug echo "packing files"
+
+    TAR_CMD="tar czf '$OUTPUT' $FILES"
+
+    debug echo "tar command\n$TAR_CMD"
+
+    [ "$TEST_MODE" -eq 0 ] && { eval "$TAR_CMD" || { error echo "failed to tar files"; exit 1; } }
+}
+
+destroy_files()
+{
+    debug echo "destroying files"
+
+    RM_CMD="rm $FILES"
+
+    debug echo "rm command\n$RM_CMD"
+
+    [ "$TEST_MODE" -eq 0 ] && { eval "$RM_CMD" || { error echo "failed to destroy files"; exit 1; } }
 }
 
 while getopts ":dtEFPvi:e:o:p:" ARG; do
@@ -129,17 +174,7 @@ done
 debug show_settings
 
 check_settings
+locate_files
+pack_files
 
-FIND_CMD="find $INCLUDE $FIND_OPTS $FIND_REGEX_OPT '$PATTERN' $PRUNE_WIDGET"
-
-debug echo "find command: $FIND_CMD"
-
-FILES=$(eval "$FIND_CMD")
-FILE_COUNT="$(echo "$FILES" | grep -v ^$ | wc -l)"
-
-debug echo "files: \n$FILES"
-
-info echo "found $FILE_COUNT files"
-
-#todo: tar.gz files
-#todo: destroy files
+[ "$DESTRUCTIVE" -ne 0 ] && destroy_files
