@@ -8,7 +8,7 @@ on:
   pull_request:
   
 jobs:
-  shellcheck:
+  basic test:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
