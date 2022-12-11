@@ -9,8 +9,9 @@ on:
   
 jobs:
   shellcheck:
-    runs-on: pipeline-components/shellcheck:latest
+    runs-on: ubuntu-latest
     steps:
-      - name: run shellcheck
-        run: |
-          ./tests/shellcheck.sh
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Lint
+        uses: pipeline-components/shellcheck@v0.6.0
