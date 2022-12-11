@@ -21,29 +21,28 @@ PRUNE_WIDGET=""
 
 debug()
 {
-    [ "$DEBUG_MODE" -ne 0 ] && echo -n "$COLOR_CYAN[debug] $COLOR_UNSET" && "$@"
+    [ "$DEBUG_MODE" -ne 0 ] && echo "$COLOR_CYAN" "[debug]" "$COLOR_UNSET\c" && "$@"
 }
 
 info()
 {
-    echo -n "$COLOR_GREEN[ info] $COLOR_UNSET" && "$@"
+    echo "$COLOR_GREEN" "[ info]" "$COLOR_UNSET\c" && "$@"
 }
 
 warn()
 {
-    echo -n "$COLOR_YELLOW[ warn] $COLOR_UNSET" && "$@"
+    echo "$COLOR_YELLOW" "[ warn]" "$COLOR_UNSET\c" && "$@"
 }
 
 error()
 {
-    echo -n "$COLOR_RED[error] $COLOR_UNSET" && "$@"
+    echo "$COLOR_RED" "[error]" "$COLOR_UNSET\c" && "$@"
 }
 
 usage() 
 {
     echo "usage: $0 -i [<include_dirs>] [-e [<exclude_dirs>]] [-dtEFPv] -o <output_file> -p <pattern>" &>&2
     echo "package files into a tar.gz" &>&2
-    echo "\n" &>&2
     echo "arguments:" &>&2
     echo "  -i <include_dirs>       directories to include (required)" &>&2
     echo "  -e <exclude_dirs>       directories to exclude" &>&2
@@ -90,7 +89,7 @@ locate_files()
 
     FILES_RAW=$(eval "$FIND_CMD")
     FILES=$(echo "$FILES_RAW" | xargs echo)
-    FILE_COUNT="$(echo "$FILES_RAW" | grep -v ^$ | wc -l)"
+    FILE_COUNT="$(echo "$FILES_RAW" | grep -v -c ^$)"
 
     if [ "$FILE_COUNT" -gt 0 ]
     then
@@ -124,13 +123,13 @@ destroy_files()
     [ "$TEST_MODE" -eq 0 ] && { eval "$RM_CMD" || { error echo "failed to destroy files"; exit 1; } }
 }
 
-while getopts ":dtEFPvi:e:o:p:" ARG; do
+while getopts ":dtvi:e:o:p:" ARG; do
     case "$ARG" in
         i) 
             INCLUDE="$OPTARG $INCLUDE"
             ;;
         e)
-            if [ ! -z "$PRUNE_WIDGET" ]
+            if [ -n "$PRUNE_WIDGET" ]
             then
                 # multiple prunes, requires or
                 PRUNE_WIDGET="$PRUNE_WIDGET -o "
@@ -153,11 +152,11 @@ while getopts ":dtEFPvi:e:o:p:" ARG; do
             debug echo "debugging enabled"
             ;;
         o) 
-            [ ! -z "$OUTPUT" ] && error echo "only one output file can be specified\n" && usage
+            [ -n "$OUTPUT" ] && error echo "only one output file can be specified\n" && usage
             OUTPUT="$OPTARG"
             ;;
         p) 
-            [ ! -z "$PATTERN" ] && error echo "only one pattern can be specified\n" && usage
+            [ -n "$PATTERN" ] && error echo "only one pattern can be specified\n" && usage
             PATTERN="$OPTARG"
             ;;
         :) 
