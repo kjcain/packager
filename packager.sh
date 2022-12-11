@@ -13,6 +13,9 @@ TEST_MODE=0
 DEBUG_MODE=0
 OUTPUT=""
 PATTERN=""
+MANIFEST=0
+MANIFEST_FILE_NAME=".manifest"
+MANIFEST_FILE=""
 
 #todo: permit ../ parent directories
 FIND_OPTS="-type f ! -name '.*' ! -path '*/.*'"
@@ -49,6 +52,7 @@ usage()
     echo "  -d                      destructive mode, delete included files after successful packaging" &>&2
     echo "  -t                      test mode, enables debug messages and does NOT package or delete files" &>&2
     echo "  -v                      print debug messages" &>&2
+    echo "  -m                      create a manifest" &>&2
     echo "  -o <output_file>        path for output of tar.gz (required)" &>&2
     echo "  -p <pattern>            pattern for identifying files of interest (required)" &>&2
     exit 1
@@ -105,11 +109,27 @@ pack_files()
 {
     debug echo "packing files"
 
-    TAR_CMD="tar czf '$OUTPUT' $FILES"
+    TAR_CMD="tar czfP '$OUTPUT' $FILES"
+
+    [ "$MANIFEST" -ne 0 ] && TAR_CMD="$TAR_CMD $MANIFEST_FILE --transform='s|$MANIFEST_FILE|$MANIFEST_FILE_NAME|'"
 
     debug echo "tar command\n$TAR_CMD"
 
     [ "$TEST_MODE" -eq 0 ] && { eval "$TAR_CMD" || { error echo "failed to tar files"; exit 1; } }
+}
+
+build_manifest()
+{
+    debug echo "building manifest"
+
+    MANIFEST_FILE=$(mktemp /tmp/manifest.XXXXXX.tmp)
+    trap 'rm "$MANIFEST_FILE"' EXIT
+
+    MANIFEST_CMD="md5sum $FILES > $MANIFEST_FILE"
+
+    debug echo "manifest command\n$MANIFEST_CMD"
+
+    [ "$TEST_MODE" -eq 0 ] && { eval "$MANIFEST_CMD"; debug echo "manifest file"; cat "$MANIFEST_FILE"; }
 }
 
 destroy_files()
@@ -123,7 +143,7 @@ destroy_files()
     [ "$TEST_MODE" -eq 0 ] && { eval "$RM_CMD" || { error echo "failed to destroy files"; exit 1; } }
 }
 
-while getopts ":dtvi:e:o:p:" ARG; do
+while getopts ":dtvmi:e:o:p:" ARG; do
     case "$ARG" in
         i) 
             INCLUDE="$OPTARG $INCLUDE"
@@ -151,6 +171,9 @@ while getopts ":dtvi:e:o:p:" ARG; do
             DEBUG_MODE=1
             debug echo "debugging enabled"
             ;;
+        m) 
+            MANIFEST=1
+            ;;
         o) 
             [ -n "$OUTPUT" ] && error echo "only one output file can be specified\n" && usage
             OUTPUT="$OPTARG"
@@ -174,6 +197,9 @@ debug show_settings
 
 check_settings
 locate_files
+
+[ "$MANIFEST" -ne 0 ] && build_manifest
+
 pack_files
 
 [ "$DESTRUCTIVE" -ne 0 ] && destroy_files
