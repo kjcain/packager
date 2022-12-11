@@ -14,11 +14,13 @@ DEBUG_MODE=0
 OUTPUT=""
 PATTERN=""
 
+FIND_OPTS="-type f ! -name '.*' ! -path '*/.*'"
+FIND_REGEX_OPT="-regex"
 PRUNE_WIDGET=""
 
 debug()
 {
-    [ "$DEBUG_MODE" -eq 1 ] && echo -n "$COLOR_CYAN[debug] $COLOR_UNSET" && $@
+    [ "$DEBUG_MODE" -eq 1 ] && echo -n "$COLOR_CYAN[debug] $COLOR_UNSET" && "$@"
 }
 
 info()
@@ -38,17 +40,17 @@ error()
 
 usage() 
 {
-    echo "usage: $0 -i [<include_dirs>] [-e [<exclude_dirs>]] [-dtEFPv] -o <output_file> -p <pattern>" &>2
-    echo "package files into a tar.gz" &>2
-    echo "\n" &>2
-    echo "arguments:" &>2
-    echo "  -i <include_dirs>       directories to include (required)" &>2
-    echo "  -e <exclude_dirs>       directories to exclude" &>2
-    echo "  -d                      destructive mode, delete included files after successful packaging" &>2
-    echo "  -t                      test mode, enables debug messages and does NOT package or delete files" &>2
-    echo "  -v                      print debug messages" &>2
-    echo "  -o <output_file>        path for output of tar.gz (required)" &>2
-    echo "  -p <pattern>            pattern for identifying files of interest (required)" &>2
+    echo "usage: $0 -i [<include_dirs>] [-e [<exclude_dirs>]] [-dtEFPv] -o <output_file> -p <pattern>" &>&2
+    echo "package files into a tar.gz" &>&2
+    echo "\n" &>&2
+    echo "arguments:" &>&2
+    echo "  -i <include_dirs>       directories to include (required)" &>&2
+    echo "  -e <exclude_dirs>       directories to exclude" &>&2
+    echo "  -d                      destructive mode, delete included files after successful packaging" &>&2
+    echo "  -t                      test mode, enables debug messages and does NOT package or delete files" &>&2
+    echo "  -v                      print debug messages" &>&2
+    echo "  -o <output_file>        path for output of tar.gz (required)" &>&2
+    echo "  -p <pattern>            pattern for identifying files of interest (required)" &>&2
     exit 1
 }
 
@@ -85,6 +87,7 @@ while getopts ":dtEFPvi:e:o:p:" ARG; do
         e)
             if [ ! -z "$PRUNE_WIDGET" ]
             then
+                # multiple prunes, requires or
                 PRUNE_WIDGET="$PRUNE_WIDGET -o "
             fi
             PRUNE_WIDGET="-path '$OPTARG' -prune"
@@ -127,16 +130,16 @@ debug show_settings
 
 check_settings
 
-FIND_CMD="find $INCLUDE -type f -regex '$PATTERN' $PRUNE_WIDGET"
+FIND_CMD="find $INCLUDE $FIND_OPTS $FIND_REGEX_OPT '$PATTERN' $PRUNE_WIDGET"
 
 debug echo "find command: $FIND_CMD"
 
 FILES=$(eval "$FIND_CMD")
+FILE_COUNT="$(echo "$FILES" | grep -v ^$ | wc -l)"
 
-FILE_COUNT=$(echo "$FILES" | wc -l)
+debug echo "files: \n$FILES"
 
 info echo "found $FILE_COUNT files"
 
-#todo: ignore hidden files
 #todo: tar.gz files
 #todo: destroy files
