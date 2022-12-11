@@ -15,3 +15,12 @@ jobs:
         uses: actions/checkout@v1
       - name: basic package
         run: sh ./test/basic_test.sh
+
+  manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v1
+      - name: basic package
+        run: sh ./test/manifest_test.sh
+
