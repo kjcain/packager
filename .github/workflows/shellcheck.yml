@@ -1,0 +1,16 @@
+name: 'shellcheck'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+  
+jobs:
+  shellcheck:
+    runs-on: pipeline-components/shellcheck:latest
+    steps:
+      - name: run shellcheck
+        run: |
+          ./tests/shellcheck.sh
