@@ -16,7 +16,7 @@ jobs:
       - name: basic package
         run: sh ./test/basic_test.sh
 
-  manifest:
+  manifest_test:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
@@ -24,3 +24,10 @@ jobs:
       - name: basic package
         run: sh ./test/manifest_test.sh
 
+  complex_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v1
+      - name: basic package
+        run: sh ./test/complex_test.sh

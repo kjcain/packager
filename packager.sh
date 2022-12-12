@@ -152,9 +152,9 @@ while getopts ":dtvmi:e:o:p:" ARG; do
             if [ -n "$PRUNE_WIDGET" ]
             then
                 # multiple prunes, requires or
-                PRUNE_WIDGET="$PRUNE_WIDGET -o "
+                PRUNE_WIDGET="$PRUNE_WIDGET "
             fi
-            PRUNE_WIDGET="-path '$OPTARG' -prune"
+            PRUNE_WIDGET="$PRUNE_WIDGET ! -path '$OPTARG*'"
 
             EXCLUDE="$OPTARG $EXCLUDE"
             ;;
