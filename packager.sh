@@ -17,7 +17,6 @@ MANIFEST=0
 MANIFEST_FILE_NAME=".manifest"
 MANIFEST_FILE=""
 
-#todo: permit ../ parent directories
 FIND_OPTS="-type f ! -name '.*' ! -path '*/.*'"
 FIND_REGEX_OPT="-regex"
 PRUNE_WIDGET=""
