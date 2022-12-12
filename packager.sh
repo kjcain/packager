@@ -44,18 +44,21 @@ error()
 
 usage() 
 {
-    echo "usage: $0 -i <include_dirs> -o <output_file> -p <pattern> [-dtvhm] [-e <exclude_dirs>...]" &>&2
-    echo "package files into a tar.gz" &>&2
-    echo "arguments:" &>&2
-    echo "  -i <include_dirs>       directories to include (required)" &>&2
-    echo "  -o <output_file>        path for output of tar.gz (required)" &>&2
-    echo "  -p <pattern>            pattern for identifying files of interest (required)" &>&2
-    echo "  -d                      destructive mode, delete included files after successful packaging" &>&2
-    echo "  -t                      test mode, enables debug messages and does NOT package or delete files" &>&2
-    echo "  -v                      print debug messages" &>&2
-    echo "  -h                      print this help message" &>&2
-    echo "  -m                      create a manifest" &>&2
-    echo "  -e <exclude_dirs>       directories to exclude" &>&2
+    cat << EOF
+usage: $0 -i <include_dirs> -o <output_file> -p <pattern> [-dtvhm] [-e <exclude_dirs>...]
+package files into a tar.gz file
+
+arguments:
+  -i <include_dirs>       directories to include (required)
+  -o <output_file>        path for output of tar.gz (required)
+  -p <pattern>            pattern for identifying files of interest (required)
+  -d                      destructive mode, delete included files after successful packaging
+  -t                      test mode, enables debug messages and does NOT package or delete files
+  -v                      print debug messages
+  -h                      print this help message
+  -m                      create a manifest
+  -e <exclude_dirs>       directories to exclude
+EOF
     exit 1
 }
 
