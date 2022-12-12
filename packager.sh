@@ -53,6 +53,7 @@ usage()
     echo "  -t                      test mode, enables debug messages and does NOT package or delete files" &>&2
     echo "  -v                      print debug messages" &>&2
     echo "  -m                      create a manifest" &>&2
+    echo "  -h                      print this help message" &>&2
     echo "  -o <output_file>        path for output of tar.gz (required)" &>&2
     echo "  -p <pattern>            pattern for identifying files of interest (required)" &>&2
     exit 1
@@ -143,7 +144,7 @@ destroy_files()
     [ "$TEST_MODE" -eq 0 ] && { eval "$RM_CMD" || { error echo "failed to destroy files"; exit 1; } }
 }
 
-while getopts ":dtvmi:e:o:p:" ARG; do
+while getopts ":dtvhmi:e:o:p:" ARG; do
     case "$ARG" in
         i) 
             INCLUDE="$OPTARG $INCLUDE"
@@ -181,6 +182,9 @@ while getopts ":dtvmi:e:o:p:" ARG; do
         p) 
             [ -n "$PATTERN" ] && error echo "only one pattern can be specified\n" && usage
             PATTERN="$OPTARG"
+            ;;
+        h)
+            usage
             ;;
         :) 
             error echo "no value given for option: -$OPTARG\n"

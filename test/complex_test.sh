@@ -119,8 +119,6 @@ validate_package()
     fi
 
     FILE_COUNT=$(tar -tzf "$TMP_DIR/package.tar.gz" 2> /dev/null | wc -l )
-    
-    tar -tzf "$TMP_DIR/package.tar.gz"
 
     if [ "$FILE_COUNT" -eq 7 ]
     then
